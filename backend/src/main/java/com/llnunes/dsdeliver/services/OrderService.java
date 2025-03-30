@@ -41,11 +41,6 @@ public class OrderService {
         order.setMoment(Instant.now());
         order.setStatus(OrderStatus.PENDING);
 
-//        for (ProductDTO p : dto.getProducts()) {
-//            var product = productRepository.findById(p.getId());
-//            order.getProducts().add(product.get());
-//        }
-
         dto.getProducts().stream()
                 .map(ProductDTO::getId)
                 .map(productRepository::findById)
@@ -55,5 +50,14 @@ public class OrderService {
 
         repository.save(order);
         return new OrderDTO(order);
+    }
+
+    @Transactional
+    public OrderDTO setDelivered(Long id) {
+        return repository.findById(id)
+                .map(order -> {
+                    order.setStatus(OrderStatus.DELIVERED);
+                    return new OrderDTO(repository.save(order));
+                }).orElseThrow(() -> new RuntimeException("Order não encontrada!"));
     }
 }
